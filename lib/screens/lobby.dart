@@ -8,6 +8,9 @@ import '../models.dart';
 import '../widgets.dart';
 import 'juego.dart';
 
+// Definimos el nuevo color Beige/Dorado solicitado
+const Color duoBeige = Color(0xFFE3CA94);
+
 class MenuLobby extends StatefulWidget {
   final Map<String, int>? puntajesGuardados;
   final ConfiguracionJuego? configGuardada;
@@ -51,6 +54,13 @@ class _MenuLobbyState extends State<MenuLobby> {
     _cargarDatosGuardados();
   }
 
+  // --- LÓGICA DE MÁXIMOS IMPOSTORES ---
+  int get maxImpostoresPermitidos {
+    if (jugadores.isEmpty) return 1;
+    int max = jugadores.length ~/ 2;
+    return max < 1 ? 1 : max;
+  }
+
   Future<void> _cargarDatosGuardados() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -71,7 +81,9 @@ class _MenuLobbyState extends State<MenuLobby> {
       usarPersonalizadas = prefs.getBool('usar_personalizadas') ?? false;
 
       cantidadImpostores = prefs.getInt('cantidad_impostores') ?? 1;
-      if (cantidadImpostores > 3) cantidadImpostores = 3;
+      if (cantidadImpostores > maxImpostoresPermitidos) {
+        cantidadImpostores = maxImpostoresPermitidos;
+      }
     });
   }
 
@@ -101,7 +113,10 @@ class _MenuLobbyState extends State<MenuLobby> {
       String nombre = jugadores[index];
       puntajes.remove(nombre);
       jugadores.removeAt(index);
-      if (jugadores.length <= 5 && cantidadImpostores > 1) cantidadImpostores = 1;
+
+      if (cantidadImpostores > maxImpostoresPermitidos) {
+        cantidadImpostores = maxImpostoresPermitidos;
+      }
     });
     _guardarTodo();
   }
@@ -318,13 +333,9 @@ class _MenuLobbyState extends State<MenuLobby> {
                     _buildDuoSwitch("🌀 Modo Caos", "Nueva palabra tras cada muerte.", config.modoCaos, (v) {
                       setStateDialog(() { config.modoCaos = v; if(v) config.modoContraReloj = false; });
                     }),
-                    _buildDuoSwitch("🎲 Modo Ruleta", "Inocentes ven SOLO 1 dato.", config.modoRuleta, (v) {
-                      setStateDialog(() { config.modoRuleta = v; if(v) config.impostorTienePista = false; });
-                    }),
 
                     const Divider(height: 20, color: duoBorder),
 
-                    // --- NUEVOS ROLES ---
                     Padding(padding: const EdgeInsets.symmetric(vertical: 8.0), child: const Text("ROLES ESPECIALES", style: TextStyle(color: Color(0xFFB721FF), fontWeight: FontWeight.bold, fontSize: 16))),
                     _buildDuoSwitch("🤫 El Silencioso", "Silencia a uno al inicio del debate.", config.rolSilencioso, (v) => setStateDialog(() => config.rolSilencioso = v)),
                     _buildDuoSwitch("🔍 Detective", "Pregunta indirecta a un jugador.", config.rolDetective, (v) => setStateDialog(() => config.rolDetective = v)),
@@ -334,7 +345,7 @@ class _MenuLobbyState extends State<MenuLobby> {
 
                     Padding(padding: const EdgeInsets.symmetric(vertical: 8.0), child: const Text("AJUSTES DE PARTIDA", style: TextStyle(color: Color(0xFFFF9600), fontWeight: FontWeight.bold, fontSize: 16))),
                     _buildDuoSwitch("🕵️ Pista Impostor", "El impostor ve la PISTA.", config.impostorTienePista, (v) {
-                      setStateDialog(() { config.impostorTienePista = v; if(v) config.modoRuleta = false; });
+                      setStateDialog(() { config.impostorTienePista = v; });
                     }),
                     _buildDuoSwitch("👥 Conocer Aliados", "Impostores saben quién es su socio.", config.impostoresSeConocen, (v) => setStateDialog(() => config.impostoresSeConocen = v)),
                     _buildDuoSwitch("💀 Sincronía Vital", "Si muere un Impostor, mueren TODOS.", config.muerteSincronizada, (v) => setStateDialog(() => config.muerteSincronizada = v)),
@@ -467,7 +478,6 @@ class _MenuLobbyState extends State<MenuLobby> {
     String emojisActivos = "";
     if (config.modoContraReloj) emojisActivos += "⏱️ ";
     if (config.modoCaos) emojisActivos += "🌀 ";
-    if (config.modoRuleta) emojisActivos += "🎲 ";
     if (config.rolSilencioso) emojisActivos += "🤫 ";
     if (config.impostorTienePista) emojisActivos += "🕵️ ";
     if (config.modoVotacionAnonima) emojisActivos += "🗳️ ";
@@ -477,8 +487,10 @@ class _MenuLobbyState extends State<MenuLobby> {
     if (config.rolComplice) emojisActivos += "🎭 ";
     if (emojisActivos.isEmpty) emojisActivos = "Clásico";
 
+    int maxUI = maxImpostoresPermitidos;
+
     return Scaffold(
-      body: SafeArea(
+      body: DuoFondo(
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(
@@ -489,35 +501,51 @@ class _MenuLobbyState extends State<MenuLobby> {
                   const SizedBox(width: 40),
                   Text("IMPOSTOR", style: duoFont(size: 40, color: AppTheme.primary)),
                   IconButton(
-                    icon: Icon(Icons.settings, color: AppTheme.primary, size: 30),
+                    icon: const Icon(Icons.settings, color: Colors.grey, size: 30),
                     onPressed: abrirConfiguracionGeneral,
                   )
                 ],
               ),
               const SizedBox(height: 20),
+
+              // --- SECCIÓN PALABRAS PROPIAS ---
               Container(
                 padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(color: duoSurface, border: Border.all(color: duoBorder, width: 2), borderRadius: BorderRadius.circular(16)),
+                decoration: BoxDecoration(
+                    color: duoBeige, // <--- NUEVO COLOR
+                    border: Border.all(color: duoBorder, width: 2),
+                    borderRadius: BorderRadius.circular(16)
+                ),
                 child: Row(
                   children: [
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text("PALABRAS PROPIAS", style: duoFont(size: 16)),
-                          Text(usarPersonalizadas ? "${packPersonalizado.length} activas" : "Desactivadas", style: const TextStyle(color: duoTextSub)),
+                          Text("PALABRAS PROPIAS", style: duoFont(size: 16, color: duoBg)),
+                          Text(usarPersonalizadas ? "${packPersonalizado.length} activas" : "Desactivadas",
+                              style: TextStyle(color: duoBg.withValues(alpha: 0.6))),
                         ],
                       ),
                     ),
-                    Switch(value: usarPersonalizadas, activeThumbColor: AppTheme.primary, onChanged: (v) { setState(() => usarPersonalizadas = v); _guardarTodo(); }),
+                    Switch(
+                        value: usarPersonalizadas,
+                        activeColor: AppTheme.primary,
+                        activeTrackColor: AppTheme.primary.withValues(alpha: 0.5),
+                        inactiveThumbColor: duoBg,
+                        onChanged: (v) { setState(() => usarPersonalizadas = v); _guardarTodo(); }
+                    ),
                     if (usarPersonalizadas) ...[
-                      IconButton(icon: const Icon(Icons.list_alt, color: duoBlue), onPressed: gestionarPalabras),
-                      IconButton(icon: Icon(Icons.add_circle, color: AppTheme.primary), onPressed: mostrarDialogoCrear),
+                      IconButton(icon: const Icon(Icons.list_alt, color: duoBg), onPressed: gestionarPalabras),
+                      // v--- AHORA EL ÍCONO "MÁS" ES NEGRO (duoBg)
+                      IconButton(icon: Icon(Icons.add_circle, color: duoBg), onPressed: mostrarDialogoCrear),
                     ]
                   ],
                 ),
               ),
               const SizedBox(height: 10),
+
+              // --- BOTONES GRANDES (Reglas y Packs) ---
               Row(
                 children: [
                   Expanded(
@@ -525,13 +553,18 @@ class _MenuLobbyState extends State<MenuLobby> {
                       onTap: configurarModos,
                       child: Container(
                         height: 100,
-                        decoration: BoxDecoration(color: duoSurface, borderRadius: BorderRadius.circular(16), border: Border.all(color: duoBorder, width: 2), boxShadow: const [BoxShadow(color: duoBorder, offset: Offset(0,4))]),
+                        decoration: BoxDecoration(
+                            color: duoBeige, // <--- NUEVO COLOR
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: duoBorder, width: 2),
+                            boxShadow: const [BoxShadow(color: duoBorder, offset: Offset(0,4))]
+                        ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(Icons.settings, color: duoBlue, size: 30),
-                            Text("REGLAS", style: duoFont(size: 14)),
-                            Text(emojisActivos, style: const TextStyle(fontSize: 12, color: duoTextSub), textAlign: TextAlign.center)
+                            const Icon(Icons.menu_book, color: duoBg, size: 30),
+                            Text("REGLAS", style: duoFont(size: 14, color: duoBg)),
+                            Text(emojisActivos, style: TextStyle(fontSize: 12, color: duoBg.withValues(alpha: 0.6)), textAlign: TextAlign.center)
                           ],
                         ),
                       ),
@@ -543,13 +576,18 @@ class _MenuLobbyState extends State<MenuLobby> {
                       onTap: configurarCategorias,
                       child: Container(
                         height: 100,
-                        decoration: BoxDecoration(color: duoSurface, borderRadius: BorderRadius.circular(16), border: Border.all(color: duoBorder, width: 2), boxShadow: const [BoxShadow(color: duoBorder, offset: Offset(0,4))]),
+                        decoration: BoxDecoration(
+                            color: duoBeige, // <--- NUEVO COLOR
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: duoBorder, width: 2),
+                            boxShadow: const [BoxShadow(color: duoBorder, offset: Offset(0,4))]
+                        ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(Icons.library_books, color: duoYellow, size: 30),
-                            Text("PACKS", style: duoFont(size: 14)),
-                            Text("$categoriasActivasCount Activos", style: const TextStyle(color: duoTextSub, fontSize: 12))
+                            const Icon(Icons.library_books, color: duoBg, size: 30),
+                            Text("PACKS", style: duoFont(size: 14, color: duoBg)),
+                            Text("$categoriasActivasCount Activos", style: TextStyle(color: duoBg.withValues(alpha: 0.6), fontSize: 12))
                           ],
                         ),
                       ),
@@ -558,6 +596,8 @@ class _MenuLobbyState extends State<MenuLobby> {
                 ],
               ),
               const SizedBox(height: 20),
+
+              // --- LISTA DE JUGADORES ---
               Expanded(
                 child: Container(
                   padding: const EdgeInsets.all(10),
@@ -602,14 +642,18 @@ class _MenuLobbyState extends State<MenuLobby> {
                 ),
               ),
               const SizedBox(height: 20),
-              if (jugadores.length > 5) ...[
+              if (maxUI > 1) ...[
                 Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                   Text("IMPOSTORES: ", style: duoFont(size: 18)),
                   Text("$cantidadImpostores", style: duoFont(size: 24, color: duoRed))
                 ]),
                 Slider(
-                    value: cantidadImpostores.toDouble(), min: 1, max: 3,
-                    activeColor: duoRed, inactiveColor: duoBorder,
+                    value: cantidadImpostores.toDouble(),
+                    min: 1,
+                    max: maxUI.toDouble(),
+                    divisions: maxUI - 1,
+                    activeColor: duoRed,
+                    inactiveColor: duoBorder,
                     onChanged: (val) {
                       setState(() => cantidadImpostores = val.toInt());
                       _guardarTodo();

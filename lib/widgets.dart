@@ -9,7 +9,7 @@ Color _getShadowColor(Color color) {
 }
 
 class DuoButton extends StatefulWidget {
-  final String? text; // <-- AHORA ES OPCIONAL (Puede ser null)
+  final String? text;
   final VoidCallback? onPressed;
   final Color color;
   final Color? shadowColor;
@@ -17,7 +17,7 @@ class DuoButton extends StatefulWidget {
 
   const DuoButton({
     super.key,
-    this.text, // <-- Quitamos el "required"
+    this.text,
     required this.onPressed,
     this.color = duoBlue,
     this.shadowColor,
@@ -55,6 +55,12 @@ class _DuoButtonState extends State<DuoButton> {
       contentColor = Colors.white;
     }
 
+    // Si el botón es del color beige/crema, el texto debe ser oscuro
+    if (widget.color == const Color(0xFFF5F0E1) || widget.color == const Color(0xFFE3CA94)) {
+      contentColor = duoBg;
+      shadow = duoBorder;
+    }
+
     return GestureDetector(
       onTapDown: (_) {
         if (widget.onPressed != null) {
@@ -83,7 +89,6 @@ class _DuoButtonState extends State<DuoButton> {
           children: [
             if (widget.icon != null) ...[
               Icon(widget.icon, color: contentColor, size: 24),
-              // Solo ponemos espacio si también hay texto
               if (widget.text != null) const SizedBox(width: 10)
             ],
             if (widget.text != null)
@@ -135,6 +140,41 @@ class DuoInput extends StatelessWidget {
           contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
         ),
       ),
+    );
+  }
+}
+
+// --- ESTA CLASE FALTABA ---
+class DuoFondo extends StatelessWidget {
+  final Widget child;
+  final Color? overlayColor;
+  final bool opacity;
+
+  const DuoFondo({
+    super.key,
+    required this.child,
+    this.overlayColor,
+    this.opacity = true
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: Image.asset(
+            "assets/fondo.png",
+            fit: BoxFit.cover,
+            errorBuilder: (c, o, s) => Container(color: duoBg),
+          ),
+        ),
+        Positioned.fill(
+          child: Container(
+            color: overlayColor ?? const Color(0xFF131F24).withOpacity(0.40),
+          ),
+        ),
+        SafeArea(child: child),
+      ],
     );
   }
 }

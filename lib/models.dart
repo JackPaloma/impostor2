@@ -2,8 +2,7 @@ class ConfiguracionJuego {
   bool modoContraReloj;
   int minutosReloj;
   bool modoCaos;
-  // bool modoSilencio; <-- ELIMINADO (Se mueve a roles)
-  bool modoRuleta;
+  // bool modoRuleta; <-- ELIMINADO
   bool modoVotacionAnonima;
 
   // Ajustes de Impostor
@@ -12,7 +11,7 @@ class ConfiguracionJuego {
   bool muerteSincronizada;
 
   // NUEVOS ROLES
-  bool rolSilencioso; // Antes modoSilencio
+  bool rolSilencioso;
   bool rolDetective;
   bool rolComplice;
 
@@ -22,7 +21,7 @@ class ConfiguracionJuego {
     this.modoContraReloj = false,
     this.minutosReloj = 5,
     this.modoCaos = false,
-    this.modoRuleta = false,
+    // this.modoRuleta = false, <-- ELIMINADO
     this.modoVotacionAnonima = false,
     this.impostorTienePista = false,
     this.impostoresSeConocen = false,
@@ -40,8 +39,8 @@ class ConfiguracionJuego {
 class JugadorEnPartida {
   final String nombre;
   final bool esImpostor;
-  final bool esComplice; // Nuevo
-  bool esDetective;      // Nuevo (se asigna en el debate)
+  final bool esComplice;
+  bool esDetective;
   bool estaVivo;
   bool estaSilenciado;
 

@@ -34,7 +34,7 @@ class _PantallaJuegoState extends State<PantallaJuego> with SingleTickerProvider
   late AnimationController _animController;
   late Animation<double> _animation;
   late List<int> indicesVivos;
-  int tipoInfoRuleta = 0;
+  // int tipoInfoRuleta = 0; // ELIMINADO
   bool _sonidoEmitido = false;
 
   @override
@@ -49,14 +49,10 @@ class _PantallaJuegoState extends State<PantallaJuego> with SingleTickerProvider
     _animController = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
     _animation = const AlwaysStoppedAnimation(0.0);
     _animController.addListener(() => setState(() => dragOffset = _animation.value));
-    _calcularRuleta();
+    // _calcularRuleta(); // ELIMINADO
   }
 
-  void _calcularRuleta() {
-    if (widget.config.modoRuleta) {
-      tipoInfoRuleta = Random().nextInt(3);
-    }
-  }
+  // void _calcularRuleta() { ... } // ELIMINADO
 
   void completarTurno() {
     if (turno < indicesVivos.length - 1) {
@@ -65,7 +61,7 @@ class _PantallaJuegoState extends State<PantallaJuego> with SingleTickerProvider
         dragOffset = 0.0;
         mostrandoTransicion = true;
         _sonidoEmitido = false;
-        _calcularRuleta();
+        // _calcularRuleta(); // ELIMINADO
       });
     } else {
       Navigator.pushReplacement(
@@ -156,18 +152,13 @@ class _PantallaJuegoState extends State<PantallaJuego> with SingleTickerProvider
       verPista = false;
 
     } else {
-      // --- INOCENTE NORMAL ---
+      // --- INOCENTE NORMAL (SIN RULETA) ---
       tituloRol = "INOCENTE";
       colorIdentidad = const Color(0xFF21D4FD);
-      if (widget.config.modoRuleta) {
-        verPalabra = (tipoInfoRuleta == 0);
-        verPista = (tipoInfoRuleta == 1);
-        verCategoria = (tipoInfoRuleta == 2);
-      } else {
-        verPalabra = true;
-        verCategoria = false;
-        verPista = false;
-      }
+      // Ahora siempre ven la palabra
+      verPalabra = true;
+      verCategoria = false;
+      verPista = false;
     }
 
     return Scaffold(
@@ -230,7 +221,9 @@ class _PantallaJuegoState extends State<PantallaJuego> with SingleTickerProvider
                                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                                 decoration: BoxDecoration(color: duoBg, borderRadius: BorderRadius.circular(10)),
                                 child: Text(widget.carta.palabra, style: duoFont(size: 24, color: duoTextMain)))
-                          else if (widget.config.modoRuleta && !jugadorActual.esImpostor && !jugadorActual.esComplice)
+                          // La opción de ruleta se eliminó
+                          else if (!jugadorActual.esImpostor && !jugadorActual.esComplice)
+                          // Esto teóricamente ya no debería pasar si verPalabra es true para inocentes
                             const Text("Palabra Oculta 🔒", style: TextStyle(color: duoTextSub)),
 
                           if (verCategoria)

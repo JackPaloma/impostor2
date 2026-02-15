@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AppTheme {
-  // Color por defecto (Azul Cian)
-  static const Color primaryDefault = Color(0xFF21D4FD);
+  // Color por defecto (Naranjo Pastel)
+  static const Color primaryDefault = Color(0xFFFFB74D);
 
   // --- LISTA ORDENADA POR GAMA CROMÁTICA ---
   static final List<Color> colors = [
     const Color(0xFFFF4B4B), // Rojo (Duo Red)
+    const Color(0xFFFFB74D), // Naranjo Pastel (Nuevo Default)
     const Color(0xFFF0932B), // Naranja Zanahoria
     const Color(0xFFFF9600), // Naranja Brillante
     const Color(0xFFFFD421), // Amarillo (Duo Yellow)
@@ -60,6 +61,7 @@ const Color duoTextSub = Color(0xFF6F8CA0);
 const Color duoRed = Color(0xFFFF4B4B);
 const Color duoBlue = Color(0xFF21D4FD);
 const Color duoYellow = Color(0xFFFFD421);
+const Color duoCream = Color(0xFFFAF8F1); // <--- BLANCO BEIGE MÁS CLARO
 
 TextStyle duoFont({double size = 16, Color color = duoTextMain, FontWeight weight = FontWeight.w900}) {
   return TextStyle(
