@@ -34,7 +34,6 @@ class _PantallaJuegoState extends State<PantallaJuego> with SingleTickerProvider
   late AnimationController _animController;
   late Animation<double> _animation;
   late List<int> indicesVivos;
-  // int tipoInfoRuleta = 0; // ELIMINADO
   bool _sonidoEmitido = false;
 
   @override
@@ -49,10 +48,7 @@ class _PantallaJuegoState extends State<PantallaJuego> with SingleTickerProvider
     _animController = AnimationController(vsync: this, duration: const Duration(milliseconds: 300));
     _animation = const AlwaysStoppedAnimation(0.0);
     _animController.addListener(() => setState(() => dragOffset = _animation.value));
-    // _calcularRuleta(); // ELIMINADO
   }
-
-  // void _calcularRuleta() { ... } // ELIMINADO
 
   void completarTurno() {
     if (turno < indicesVivos.length - 1) {
@@ -61,7 +57,6 @@ class _PantallaJuegoState extends State<PantallaJuego> with SingleTickerProvider
         dragOffset = 0.0;
         mostrandoTransicion = true;
         _sonidoEmitido = false;
-        // _calcularRuleta(); // ELIMINADO
       });
     } else {
       Navigator.pushReplacement(
@@ -147,17 +142,18 @@ class _PantallaJuegoState extends State<PantallaJuego> with SingleTickerProvider
       // --- CÓMPLICE ---
       tituloRol = "CÓMPLICE";
       colorIdentidad = const Color(0xFFB721FF); // Violeta
-      verPalabra = true; // Ve la palabra para disimular
-      verCategoria = false;
+      // Si está el modo Solo Categoría, no ven la palabra, ven la categoría
+      verPalabra = !widget.config.modoSoloCategoria;
+      verCategoria = widget.config.modoSoloCategoria;
       verPista = false;
 
     } else {
-      // --- INOCENTE NORMAL (SIN RULETA) ---
+      // --- INOCENTE NORMAL ---
       tituloRol = "INOCENTE";
       colorIdentidad = const Color(0xFF21D4FD);
-      // Ahora siempre ven la palabra
-      verPalabra = true;
-      verCategoria = false;
+      // Si está el modo Solo Categoría, no ven la palabra, ven la categoría
+      verPalabra = !widget.config.modoSoloCategoria;
+      verCategoria = widget.config.modoSoloCategoria;
       verPista = false;
     }
 
@@ -221,17 +217,18 @@ class _PantallaJuegoState extends State<PantallaJuego> with SingleTickerProvider
                                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                                 decoration: BoxDecoration(color: duoBg, borderRadius: BorderRadius.circular(10)),
                                 child: Text(widget.carta.palabra, style: duoFont(size: 24, color: duoTextMain)))
-                          // La opción de ruleta se eliminó
+                          else if (verCategoria)
+                            Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                                decoration: BoxDecoration(color: duoBg, borderRadius: BorderRadius.circular(10)),
+                                child: Column(
+                                  children: [
+                                    Text("CATEGORÍA:", style: duoFont(size: 14, color: duoTextSub)),
+                                    Text(widget.carta.categoria.toUpperCase(), style: duoFont(size: 20, color: colorIdentidad)),
+                                  ],
+                                ))
                           else if (!jugadorActual.esImpostor && !jugadorActual.esComplice)
-                          // Esto teóricamente ya no debería pasar si verPalabra es true para inocentes
-                            const Text("Palabra Oculta 🔒", style: TextStyle(color: duoTextSub)),
-
-                          if (verCategoria)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 10),
-                              child: Text(widget.carta.categoria.toUpperCase(),
-                                  style: TextStyle(color: colorIdentidad, fontWeight: FontWeight.bold, fontSize: 16)),
-                            ),
+                              const Text("Palabra Oculta 🔒", style: TextStyle(color: duoTextSub)),
 
                           if (verPista)
                             Padding(

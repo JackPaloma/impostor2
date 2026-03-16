@@ -23,15 +23,20 @@ dev_dependencies:
   # Reglas de estilo de código
   flutter_lints: ^6.0.0
 
-  # Herramienta para generar el icono de la app (Agregado)
+  # Herramienta para generar el icono de la app
   flutter_launcher_icons: ^0.13.1
 
 flutter:
   uses-material-design: true
+
+  # AQUI ESTABA EL ERROR: Faltaba registrar las otras imagenes
   assets:
     - assets/fondo.png
+    - assets/fondo_juego.png      # Para la pantalla de juego
+    - assets/fondo_inocentes.png  # Para cuando ganan inocentes
+    - assets/fondo_impostor.png   # Para cuando gana el impostor
 
-# Configuración del Icono de la App (Agregado)
+# Configuración del Icono de la App
 flutter_icons:
   android: "launcher_icon"
   ios: true

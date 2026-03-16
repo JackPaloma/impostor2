@@ -3,6 +3,9 @@ import '../models.dart';
 import '../theme.dart';
 import '../widgets.dart';
 
+// Color Beige para consistencia visual
+const Color duoBeige = Color(0xFFE3CA94);
+
 class PantallaVotacionTurnos extends StatefulWidget {
   final List<JugadorEnPartida> listaJugadores;
   final Function(String?) onTerminarVotacion;
@@ -49,44 +52,49 @@ class _PantallaVotacionTurnosState extends State<PantallaVotacionTurnos> {
 
   @override
   Widget build(BuildContext context) {
+    // --- ESTADO 1: ESPERANDO JUGADOR (PASE EL TELÉFONO) ---
     if (esperandoJugador) {
       return Scaffold(
+        backgroundColor: duoBg, // Fondo plano oscuro
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: duoBorder, width: 4)
-                  ),
-                  child: const Icon(Icons.how_to_vote, size: 80, color: duoTextSub)
-              ),
-              const SizedBox(height: 40),
-              Text("TURNO DE VOTAR:", style: duoFont(size: 20, color: duoTextSub)),
-              const SizedBox(height: 10),
-              // CORREGIDO: Usa el color del tema elegido
-              Text(votantesVivos[turnoIndex], style: duoFont(size: 45, color: AppTheme.primary)),
-              const SizedBox(height: 60),
-              // CORREGIDO: Botón con color del tema
-              SizedBox(
-                  width: 200,
-                  child: DuoButton(
-                      text: "VOTAR",
-                      color: AppTheme.primary,
-                      onPressed: () => setState(() => esperandoJugador = false)
-                  )
-              )
-            ],
+          child: Container(
+            width: 300,
+            padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+            decoration: BoxDecoration(
+                color: duoBeige, // <--- TARJETA BEIGE (Estilo Lobby)
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: duoBorder, width: 4),
+                boxShadow: const [BoxShadow(color: Colors.black45, offset: Offset(0, 10), blurRadius: 10)]
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.how_to_vote, size: 80, color: duoBg),
+                const SizedBox(height: 20),
+                Text("TURNO DE VOTAR", style: TextStyle(color: duoBg.withOpacity(0.7), fontWeight: FontWeight.bold, fontSize: 16)),
+                const SizedBox(height: 10),
+                Text(votantesVivos[turnoIndex].toUpperCase(), textAlign: TextAlign.center, style: duoFont(size: 40, color: duoBg)),
+                const SizedBox(height: 40),
+                SizedBox(
+                    width: 200,
+                    child: DuoButton(
+                        text: "VOTAR",
+                        color: duoBg, // Botón oscuro sobre beige
+                        onPressed: () => setState(() => esperandoJugador = false)
+                    )
+                )
+              ],
+            ),
           ),
         ),
       );
     }
 
+    // --- ESTADO 2: SELECCIÓN DE VOTO ---
     String votanteActual = votantesVivos[turnoIndex];
 
     return Scaffold(
+      backgroundColor: duoBg, // Fondo plano
       body: SafeArea(
         child: Column(
           children: [
@@ -94,9 +102,21 @@ class _PantallaVotacionTurnosState extends State<PantallaVotacionTurnos> {
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
-                  // CORREGIDO: Reemplacé duoOrange por duoYellow (que sí existe) o color fijo
-                  Text("VOTA EN SECRETO", style: duoFont(size: 24, color: const Color(0xFFFF9600))),
-                  Text(votanteActual, style: TextStyle(color: duoTextSub, fontSize: 16)),
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                    decoration: BoxDecoration(
+                        color: duoSurface,
+                        borderRadius: BorderRadius.circular(15),
+                        border: Border.all(color: duoBorder)
+                    ),
+                    child: Column(
+                      children: [
+                        Text("VOTO SECRETO 🤫", style: duoFont(size: 20, color: const Color(0xFFFF9600))),
+                        const SizedBox(height: 5),
+                        Text("Estás votando como: $votanteActual", style: const TextStyle(color: duoTextSub, fontSize: 14)),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -107,7 +127,6 @@ class _PantallaVotacionTurnosState extends State<PantallaVotacionTurnos> {
                 itemBuilder: (context, index) {
                   final candidato = widget.listaJugadores[index];
                   if (!candidato.estaVivo) return const SizedBox();
-
                   if (candidato.nombre == votanteActual) return const SizedBox();
 
                   return Padding(
@@ -125,8 +144,8 @@ class _PantallaVotacionTurnosState extends State<PantallaVotacionTurnos> {
             Padding(
               padding: const EdgeInsets.all(20),
               child: DuoButton(
-                text: "SALTAR",
-                color: duoSurface,
+                text: "SALTAR VOTO (NADIE)",
+                color: duoSurface.withOpacity(0.5),
                 shadowColor: duoBorder,
                 onPressed: () => registrarVoto(null),
               ),
@@ -138,6 +157,7 @@ class _PantallaVotacionTurnosState extends State<PantallaVotacionTurnos> {
   }
 }
 
+// --- PANTALLA DE CONTEO ---
 class PantallaConteoAnimado extends StatefulWidget {
   final List<JugadorEnPartida> listaJugadores;
   final Map<String, int> conteoVotos;
@@ -211,13 +231,21 @@ class _PantallaConteoAnimadoState extends State<PantallaConteoAnimado> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: duoBg, // Fondo plano
       body: SafeArea(
         child: Column(
           children: [
             Padding(
               padding: const EdgeInsets.all(20),
-              // CORREGIDO: Usa el color del tema
-              child: Text("RESULTADOS", style: duoFont(size: 30, color: AppTheme.primary)),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                decoration: BoxDecoration(
+                    color: duoBeige, // Cabecera Beige
+                    borderRadius: BorderRadius.circular(15),
+                    border: Border.all(color: duoBorder, width: 2)
+                ),
+                child: Text("RESULTADOS", style: duoFont(size: 30, color: duoBg)),
+              ),
             ),
             Expanded(
               child: ListView.builder(
@@ -229,23 +257,26 @@ class _PantallaConteoAnimadoState extends State<PantallaConteoAnimado> {
                   int votos = votosVisibles[jugador.nombre] ?? 0;
 
                   return Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                    padding: const EdgeInsets.all(10),
+                    margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    padding: const EdgeInsets.all(15),
                     decoration: BoxDecoration(
                         color: duoSurface,
                         border: Border.all(color: duoBorder, width: 2),
-                        borderRadius: BorderRadius.circular(10)
+                        borderRadius: BorderRadius.circular(15),
+                        boxShadow: const [BoxShadow(color: Colors.black26, offset: Offset(0, 2))]
                     ),
                     child: Row(
                       children: [
                         SizedBox(
                           width: 100,
-                          child: Text(jugador.nombre, style: duoFont(size: 16)),
+                          child: Text(jugador.nombre, style: duoFont(size: 18, color: duoTextMain)),
                         ),
+                        Container(width: 2, height: 30, color: duoBorder), // Separador
+                        const SizedBox(width: 10),
                         Expanded(
                           child: Wrap(
-                            spacing: 5,
-                            children: List.generate(votos, (i) => const Icon(Icons.person, color: duoRed, size: 24)),
+                            spacing: 8,
+                            children: List.generate(votos, (i) => const Icon(Icons.how_to_vote, color: duoRed, size: 28)),
                           ),
                         )
                       ],
@@ -255,8 +286,8 @@ class _PantallaConteoAnimadoState extends State<PantallaConteoAnimado> {
               ),
             ),
             const SizedBox(height: 20),
-            Text("Contando votos...", style: TextStyle(color: duoTextSub, fontStyle: FontStyle.italic)),
-            const SizedBox(height: 20),
+            const Text("Contando votos...", style: TextStyle(color: duoTextSub, fontStyle: FontStyle.italic)),
+            const SizedBox(height: 40),
           ],
         ),
       ),

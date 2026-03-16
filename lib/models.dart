@@ -2,8 +2,8 @@ class ConfiguracionJuego {
   bool modoContraReloj;
   int minutosReloj;
   bool modoCaos;
-  // bool modoRuleta; <-- ELIMINADO
   bool modoVotacionAnonima;
+  bool modoSoloCategoria; // <--- NUEVO CAMPO
 
   // Ajustes de Impostor
   bool impostorTienePista;
@@ -21,8 +21,8 @@ class ConfiguracionJuego {
     this.modoContraReloj = false,
     this.minutosReloj = 5,
     this.modoCaos = false,
-    // this.modoRuleta = false, <-- ELIMINADO
     this.modoVotacionAnonima = false,
+    this.modoSoloCategoria = false, // <--- VALOR POR DEFECTO
     this.impostorTienePista = false,
     this.impostoresSeConocen = false,
     this.muerteSincronizada = false,

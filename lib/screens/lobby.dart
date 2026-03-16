@@ -260,6 +260,7 @@ class _MenuLobbyState extends State<MenuLobby> {
                                   onPressed: () {
                                     AppTheme.toggleSound();
                                     setStateDialog(() {});
+                                    setState(() {}); // <-- Actualiza la pantalla de fondo en tiempo real
                                   },
                                 ),
                               ],
@@ -282,6 +283,7 @@ class _MenuLobbyState extends State<MenuLobby> {
                                     onTap: () {
                                       AppTheme.setColor(color);
                                       setStateDialog((){});
+                                      setState((){}); // <-- Actualiza la pantalla de fondo en tiempo real
                                     },
                                     child: Container(
                                       width: 45, height: 45,
@@ -307,7 +309,9 @@ class _MenuLobbyState extends State<MenuLobby> {
               }
           );
         }
-    );
+    ).then((_) {
+      if (mounted) setState(() {}); // Asegurarnos de que actualice al cerrar el modal
+    });
   }
 
   void configurarModos() {
@@ -334,18 +338,33 @@ class _MenuLobbyState extends State<MenuLobby> {
                       setStateDialog(() { config.modoCaos = v; if(v) config.modoContraReloj = false; });
                     }),
 
+                    // --- MODO SOLO CATEGORÍA ---
+                    _buildDuoSwitch("🏷️ Solo Categoría", "Los inocentes solo ven la categoría.", config.modoSoloCategoria, (v) {
+                      setStateDialog(() {
+                        config.modoSoloCategoria = v;
+                        if(v) {
+                          // Desactivamos roles y pistas incompatibles
+                          config.rolSilencioso = false;
+                          config.rolDetective = false;
+                          config.rolComplice = false;
+                          config.impostorTienePista = false;
+                        }
+                      });
+                    }),
+                    // ---------------------------------
+
                     const Divider(height: 20, color: duoBorder),
 
                     Padding(padding: const EdgeInsets.symmetric(vertical: 8.0), child: const Text("ROLES ESPECIALES", style: TextStyle(color: Color(0xFFB721FF), fontWeight: FontWeight.bold, fontSize: 16))),
-                    _buildDuoSwitch("🤫 El Silencioso", "Silencia a uno al inicio del debate.", config.rolSilencioso, (v) => setStateDialog(() => config.rolSilencioso = v)),
-                    _buildDuoSwitch("🔍 Detective", "Pregunta indirecta a un jugador.", config.rolDetective, (v) => setStateDialog(() => config.rolDetective = v)),
-                    _buildDuoSwitch("🎭 Cómplice", "Inocente que ayuda a impostores (+2 pts).", config.rolComplice, (v) => setStateDialog(() => config.rolComplice = v)),
+                    _buildDuoSwitch("🤫 El Silencioso", "Silencia a uno al inicio del debate.", config.rolSilencioso, (v) => setStateDialog(() { config.rolSilencioso = v; if(v) config.modoSoloCategoria = false; })),
+                    _buildDuoSwitch("🔍 Detective", "Pregunta indirecta a un jugador.", config.rolDetective, (v) => setStateDialog(() { config.rolDetective = v; if(v) config.modoSoloCategoria = false; })),
+                    _buildDuoSwitch("🎭 Cómplice", "Inocente que ayuda a impostores (+2 pts).", config.rolComplice, (v) => setStateDialog(() { config.rolComplice = v; if(v) config.modoSoloCategoria = false; })),
 
                     const Divider(height: 20, color: duoBorder),
 
                     Padding(padding: const EdgeInsets.symmetric(vertical: 8.0), child: const Text("AJUSTES DE PARTIDA", style: TextStyle(color: Color(0xFFFF9600), fontWeight: FontWeight.bold, fontSize: 16))),
                     _buildDuoSwitch("🕵️ Pista Impostor", "El impostor ve la PISTA.", config.impostorTienePista, (v) {
-                      setStateDialog(() { config.impostorTienePista = v; });
+                      setStateDialog(() { config.impostorTienePista = v; if(v) config.modoSoloCategoria = false; });
                     }),
                     _buildDuoSwitch("👥 Conocer Aliados", "Impostores saben quién es su socio.", config.impostoresSeConocen, (v) => setStateDialog(() => config.impostoresSeConocen = v)),
                     _buildDuoSwitch("💀 Sincronía Vital", "Si muere un Impostor, mueren TODOS.", config.muerteSincronizada, (v) => setStateDialog(() => config.muerteSincronizada = v)),
@@ -478,6 +497,7 @@ class _MenuLobbyState extends State<MenuLobby> {
     String emojisActivos = "";
     if (config.modoContraReloj) emojisActivos += "⏱️ ";
     if (config.modoCaos) emojisActivos += "🌀 ";
+    if (config.modoSoloCategoria) emojisActivos += "🏷️ ";
     if (config.rolSilencioso) emojisActivos += "🤫 ";
     if (config.impostorTienePista) emojisActivos += "🕵️ ";
     if (config.modoVotacionAnonima) emojisActivos += "🗳️ ";
@@ -537,8 +557,7 @@ class _MenuLobbyState extends State<MenuLobby> {
                     ),
                     if (usarPersonalizadas) ...[
                       IconButton(icon: const Icon(Icons.list_alt, color: duoBg), onPressed: gestionarPalabras),
-                      // v--- AHORA EL ÍCONO "MÁS" ES NEGRO (duoBg)
-                      IconButton(icon: Icon(Icons.add_circle, color: duoBg), onPressed: mostrarDialogoCrear),
+                      IconButton(icon: const Icon(Icons.add_circle, color: duoBg), onPressed: mostrarDialogoCrear),
                     ]
                   ],
                 ),

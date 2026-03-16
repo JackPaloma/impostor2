@@ -72,9 +72,56 @@ class _PantallaDebateState extends State<PantallaDebate> {
   }
 
   void _ejecutarRolesEspeciales() async {
+    final vivos = widget.listaJugadores.where((j) => j.estaVivo).toList();
+
+    // 0. ANUNCIO DE TURNO INICIAL Y SENTIDO
+    if (vivos.isNotEmpty) {
+      final jugadorInicial = vivos[Random().nextInt(vivos.length)];
+      final bool esHorario = Random().nextBool();
+      final String direccionText = esHorario ? "HORARIO" : "ANTIHORARIO";
+      final IconData direccionIcon = esHorario ? Icons.rotate_right : Icons.rotate_left;
+
+      if (!mounted) return;
+      await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          backgroundColor: duoSurface,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Icon(Icons.record_voice_over, color: AppTheme.primary, size: 50),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("ORDEN DE DEBATE", textAlign: TextAlign.center, style: duoFont(size: 24, color: duoTextMain)),
+              const SizedBox(height: 20),
+              const Text("EMPIEZA A HABLAR:", style: TextStyle(color: duoTextSub, fontSize: 14)),
+              Text(jugadorInicial.nombre, style: duoFont(size: 32, color: AppTheme.primary)),
+              const SizedBox(height: 20),
+              const Text("SENTIDO:", style: TextStyle(color: duoTextSub, fontSize: 14)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(direccionIcon, color: duoYellow, size: 30),
+                  const SizedBox(width: 10),
+                  Text(direccionText, style: duoFont(size: 24, color: duoYellow)),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            Center(
+                child: SizedBox(
+                    width: 150,
+                    child: DuoButton(text: "¡A DEBATIR!", color: AppTheme.primary, onPressed: () => Navigator.pop(context))
+                )
+            )
+          ],
+        ),
+      );
+    }
+
     // 1. ROL: EL SILENCIOSO (Silencia a alguien al azar)
     if (widget.config.rolSilencioso) {
-      final vivos = widget.listaJugadores.where((j) => j.estaVivo).toList();
       if (vivos.isNotEmpty) {
         final victima = vivos[Random().nextInt(vivos.length)];
         setState(() => victima.estaSilenciado = true);
@@ -95,7 +142,6 @@ class _PantallaDebateState extends State<PantallaDebate> {
 
     // 2. ROL: DETECTIVE (Se revela y recibe instrucción)
     if (widget.config.rolDetective) {
-      final vivos = widget.listaJugadores.where((j) => j.estaVivo).toList();
       if (vivos.isNotEmpty) {
         // Elegimos un detective al azar entre los vivos
         final detective = vivos[Random().nextInt(vivos.length)];

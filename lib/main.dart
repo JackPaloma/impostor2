@@ -1,51 +1,35 @@
 import 'package:flutter/material.dart';
-// CORRECCIÓN: Quitamos el "lib/" del principio
-import 'theme.dart';
+import 'package:flutter/services.dart'; //
 import 'screens/lobby.dart';
+import 'theme.dart';
 
-void main() {
-  runApp(const DuoThemeApp());
+void main() async {
+  // Asegura que los bindings de Flutter estén inicializados
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Bloquea la orientación de forma permanente en vertical
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
+  runApp(const MyApp());
 }
 
-class DuoThemeApp extends StatelessWidget {
-  const DuoThemeApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<Color>(
-      valueListenable: AppTheme.colorNotifier,
-      builder: (context, newColor, child) {
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-              fontFamily: 'Roboto',
-              scaffoldBackgroundColor: duoBg,
-              dialogBackgroundColor: duoSurface,
-              brightness: Brightness.dark,
-              colorScheme: ColorScheme.dark(
-                primary: newColor,
-                secondary: newColor,
-              ),
-              sliderTheme: SliderThemeData(
-                activeTrackColor: newColor,
-                thumbColor: newColor,
-                inactiveTrackColor: duoBorder,
-              ),
-              switchTheme: SwitchThemeData(
-                // Nota: En Flutter muy nuevo, usa WidgetStateProperty en vez de MaterialStateProperty
-                thumbColor: MaterialStateProperty.resolveWith((states) {
-                  if (states.contains(MaterialState.selected)) return newColor;
-                  return duoTextSub;
-                }),
-                trackColor: MaterialStateProperty.resolveWith((states) {
-                  if (states.contains(MaterialState.selected)) return newColor.withOpacity(0.5);
-                  return duoBorder;
-                }),
-              )
-          ),
-          home: const MenuLobby(),
-        );
-      },
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'Impostor',
+      theme: ThemeData(
+        brightness: Brightness.dark,
+        primaryColor: AppTheme.primary,
+        scaffoldBackgroundColor: duoBg,
+      ),
+      home: const MenuLobby(),
     );
   }
 }

@@ -55,7 +55,6 @@ class _DuoButtonState extends State<DuoButton> {
       contentColor = Colors.white;
     }
 
-    // Si el botón es del color beige/crema, el texto debe ser oscuro
     if (widget.color == const Color(0xFFF5F0E1) || widget.color == const Color(0xFFE3CA94)) {
       contentColor = duoBg;
       shadow = duoBorder;
@@ -144,17 +143,18 @@ class DuoInput extends StatelessWidget {
   }
 }
 
-// --- ESTA CLASE FALTABA ---
 class DuoFondo extends StatelessWidget {
   final Widget child;
   final Color? overlayColor;
   final bool opacity;
+  final String imagen; // <--- NUEVO PARÁMETRO
 
   const DuoFondo({
     super.key,
     required this.child,
     this.overlayColor,
-    this.opacity = true
+    this.opacity = true,
+    this.imagen = "assets/fondo.png", // <--- VALOR POR DEFECTO
   });
 
   @override
@@ -163,7 +163,7 @@ class DuoFondo extends StatelessWidget {
       children: [
         Positioned.fill(
           child: Image.asset(
-            "assets/fondo.png",
+            imagen, // <--- USAMOS LA VARIABLE
             fit: BoxFit.cover,
             errorBuilder: (c, o, s) => Container(color: duoBg),
           ),
